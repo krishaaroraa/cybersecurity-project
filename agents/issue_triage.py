@@ -10,9 +10,10 @@ findings = []
 
 # To simulate "triaging issues", we'll scan for TODO comments and FIXMEs
 # across the project's Python and JavaScript files.
+# Patterns use a [ ]? to avoid matching the regex definitions themselves easily.
 patterns = [
-    (re.compile(r"TODO:\s*(.*)", re.IGNORECASE), "Minor"),
-    (re.compile(r"FIXME:\s*(.*)", re.IGNORECASE), "High"),
+    (re.compile(r"TO" + r"DO:\s*(.*)", re.IGNORECASE), "Minor"),
+    (re.compile(r"FIX" + r"ME:\s*(.*)", re.IGNORECASE), "High"),
 ]
 
 for path in Path(".").rglob("*"):
@@ -21,7 +22,7 @@ for path in Path(".").rglob("*"):
     if any(
         part in {".git", ".github", "__pycache__", "venv", ".venv", "node_modules"}
         for part in path.parts
-    ):
+    ) or path.name == "issue_triage.py":
         continue
     if path.suffix not in {".py", ".js", ".vue", ".yml", ".yaml"}:
         continue
@@ -33,8 +34,12 @@ for path in Path(".").rglob("*"):
 
     for pattern, priority in patterns:
         for match in pattern.finditer(content):
+            task = match.group(1).strip()
+            # Simple heuristic to avoid matching the regex definition line itself if it somehow slips through
+            if "re.compile" in task or "patterns =" in task:
+                continue
             findings.append(
-                {"file": str(path), "priority": priority, "task": match.group(1).strip()}
+                {"file": str(path), "priority": priority, "task": task}
             )
 
 with open(report_dir / "issue-triage-report.md", "w", encoding="utf-8") as f:

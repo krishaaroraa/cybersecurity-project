@@ -3,5 +3,5 @@
 ## Identified Tasks
 | File | Priority | Task |
 | --- | --- | --- |
-| `agents/issue_triage.py` | Minor | \s*(.*)", re.IGNORECASE), "Minor"), |
-| `agents/issue_triage.py` | High | \s*(.*)", re.IGNORECASE), "High"), |
+| `demo_src/api.py` | High | handle connection timeout |
+| `demo_src/utils.js` | Minor | implement logging |

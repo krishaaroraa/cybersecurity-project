@@ -5,7 +5,7 @@ print("Running Compliance Reporter...")
 report_dir = Path("reports")
 report_dir.mkdir(exist_ok=True)
 
-required = [
+REQUIRED_FILES = [
     "README.md",
     ".github/workflows/agent-flow.yml",
     "agents/orchestrator_agent.py",
@@ -13,7 +13,7 @@ required = [
     ".gitignore",
 ]
 
-missing = [item for item in required if not Path(item).exists()]
+missing = [item for item in REQUIRED_FILES if not Path(item).exists()]
 
 with open(report_dir / "compliance-report.md", "w", encoding="utf-8") as f:
     f.write("# Compliance Report\n\n")
