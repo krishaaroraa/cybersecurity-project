@@ -1,0 +1,36 @@
+name: Agent Flow
+
+on:
+  pull_request:
+  issues:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  run-agents:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run Agent Flow
+        run: python agents/orchestrator_agent.py
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: agent-output
+          path: |
+            reports/
+            tests/
