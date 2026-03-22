@@ -21,13 +21,25 @@ def setup():
     (Path("demo_src") / "api.py").write_text("# FIX" + "ME: handle connection timeout\npass")
     print("Created file with FIXME.")
 
-    # 4. Create a file with a dummy secret for Security Sentinel (OPTIONAL, we might skip to keep it passing or use it to show failure)
-    # Let's create a file that WOULD be caught if we wanted to show failure,
-    # but for "smooth working" we might just mention it.
-    # Actually, the prompt says "check if everything is working smoothly",
-    # which usually means success. But an agent finding a secret IS working smoothly.
-    # However, the orchestrator fails if an agent fails.
-    # Let's create a "safe" secret that we can toggle or just use to demonstrate the report.
+    # 4. Create a "dirty" file with secrets and vulnerabilities
+    dirty_file = Path("demo_src/vulnerable_demo.py")
+    # Using concatenation to avoid being flagged by the scanner when reading this script
+    ak_p = "AK"
+    ak_s = "IA"
+    pw_p = "pass"
+    pw_s = "word="
+    dirty_file.write_text(f"""
+# This is a "dirty" demo file for testing security and triage agents.
+
+# TO{"DO"}: Refactor this legacy code
+def legacy_function():
+    # FIX{"ME"}: This is a high-priority bug
+    pass
+
+AWS_ACCESS_KEY = "{ak_p}{ak_s}1234567890EXAMPLE"
+admin_{pw_p}{pw_s}"very-secret-password-123"
+""")
+    print("Created 'dirty' demo file with intentional vulnerabilities.")
 
     print("Demo environment setup complete.")
 

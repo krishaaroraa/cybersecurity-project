@@ -15,14 +15,16 @@ def run_demo():
 
     # 2. Run the Orchestrator
     print("\n--- Step 2: Running Orchestrator Agent ---")
+    print("(Note: Orchestrator will exit with non-zero if agents find issues)")
     orch_result = subprocess.run([sys.executable, "agents/orchestrator_agent.py"])
 
-    # NOTE: If an agent finds a finding that triggers a failure (like Security Sentinel),
-    # the orchestrator might exit with non-zero. That's actually "working smoothly" in its context.
-    # But for a smooth demo walkthrough, we might want to check if reports were generated.
+    if orch_result.returncode != 0:
+        print("\n[INFO] Orchestrator correctly reported agent findings as failures.")
+    else:
+        print("\n[WARNING] Orchestrator did not report any findings as failures.")
 
     # 3. Verify reports
-    print("\n--- Step 3: Verifying generated reports ---")
+    print("\n--- Step 3: Verifying and displaying agent findings ---")
     reports_dir = Path("reports")
     expected_reports = [
         "security-report.md",
@@ -33,11 +35,9 @@ def run_demo():
     for report in expected_reports:
         report_path = reports_dir / report
         if report_path.exists():
-            print(f"[OK] Report found: {report}")
-            # print first few lines of the report
-            with open(report_path, 'r') as f:
-                header = f.readline().strip()
-                print(f"     Title: {header}")
+            print(f"\n[OK] Findings from {report}:")
+            with open(report_path, 'r', encoding='utf-8') as f:
+                print(f.read())
         else:
             print(f"[MISSING] Report not found: {report}")
 

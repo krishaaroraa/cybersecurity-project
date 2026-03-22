@@ -25,8 +25,27 @@ python3 agents/orchestrator_agent.py
 
 ## Demo
 
-To run a full demo that sets up a temporary environment with sample files (Vue components, TODOs, FIXMEs) and executes the orchestrator:
+To run a full demo that sets up a "dirty" environment with sample files (Vue components, TODOs, FIXMEs, and dummy secrets) and executes the orchestrator to show its detection capabilities:
 
 ```bash
 python3 run_demo.py
 ```
+
+## Docker Integration
+
+To run the agentic workflow using Docker, you can build and run the container:
+
+```bash
+docker-compose build
+docker-compose up agentic-workflow
+```
+
+Or run the full demo in Docker:
+
+```bash
+docker-compose up demo-run
+```
+
+## Projects Directory
+
+The `projects/` directory is where sample projects managed by the workflow can be stored (e.g., `projects/sample-app/`).
