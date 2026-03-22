@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  agentic-workflow:
+    build: .
+    volumes:
+      - .:/app
+    command: python3 agents/orchestrator_agent.py
+
+  demo-run:
+    build: .
+    volumes:
+      - .:/app
+    command: python3 run_demo.py
