@@ -25,7 +25,7 @@ python3 agents/orchestrator_agent.py
 
 ## Demo
 
-To run a full demo that sets up a temporary environment with sample files (Vue components, TODOs, FIXMEs) and executes the orchestrator:
+To run a full demo that sets up a "dirty" environment with sample files (Vue components, TODOs, FIXMEs, and dummy secrets) and executes the orchestrator to show its detection capabilities:
 
 ```bash
 python3 run_demo.py
