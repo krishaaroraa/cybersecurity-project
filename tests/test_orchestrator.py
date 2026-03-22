@@ -20,11 +20,15 @@ class TestOrchestrator(unittest.TestCase):
         mock_run.return_value.returncode = 0
         
         # Test success case
-        code = orchestrator_agent.run_agent("test_agent.py")
+        code, duration = orchestrator_agent.run_agent("test_agent.py")
         
         self.assertEqual(code, 0)
+        self.assertGreaterEqual(duration, 0)
         mock_run.assert_called_once()
-        self.assertIn("=== Finished test_agent.py with code 0 ===", mock_print.call_args_list[-1][0][0])
+        # The print message now includes duration
+        last_print = mock_print.call_args_list[-1][0][0]
+        self.assertIn("=== Finished test_agent.py", last_print)
+        self.assertIn("with code 0 ===", last_print)
 
     @patch("subprocess.run")
     @patch("builtins.print")
@@ -35,18 +39,21 @@ class TestOrchestrator(unittest.TestCase):
         mock_run.return_value.returncode = 1
         
         # Test failure case
-        code = orchestrator_agent.run_agent("test_agent.py")
+        code, duration = orchestrator_agent.run_agent("test_agent.py")
         
         self.assertEqual(code, 1)
+        self.assertGreaterEqual(duration, 0)
         mock_run.assert_called_once()
-        self.assertIn("=== Finished test_agent.py with code 1 ===", mock_print.call_args_list[-1][0][0])
+        last_print = mock_print.call_args_list[-1][0][0]
+        self.assertIn("=== Finished test_agent.py", last_print)
+        self.assertIn("with code 1 ===", last_print)
 
     @patch("orchestrator_agent.run_agent")
     @patch("builtins.print")
     @patch("sys.exit")
     def test_main_all_success(self, mock_exit, mock_print, mock_run_agent):
-        # Mock run_agent to always return success (0)
-        mock_run_agent.return_value = 0
+        # Mock run_agent to always return success (0, duration)
+        mock_run_agent.return_value = (0, 0.5)
         
         # Call main
         orchestrator_agent.main()
@@ -54,17 +61,19 @@ class TestOrchestrator(unittest.TestCase):
         # Check that sys.exit was NOT called for failure
         mock_exit.assert_not_called()
         
-        # Verify summary was printed
-        any_summary = any("Execution Summary" in str(call[0][0]) for call in mock_print.call_args_list)
+        # Verify summary was printed (checking for table headers)
+        any_summary = any("Agent" in str(call[0][0]) and "Status" in str(call[0][0]) for call in mock_print.call_args_list)
         self.assertTrue(any_summary)
 
     @patch("orchestrator_agent.run_agent")
     @patch("builtins.print")
     @patch("sys.exit")
     def test_main_with_failure(self, mock_exit, mock_print, mock_run_agent):
-        # Mock run_agent to return failure (1) for one of the agents
+        # Mock run_agent to return failure (1, duration) for one of the agents
         # We now have 5 agents in the list
-        mock_run_agent.side_effect = [0, 0, 1, 0, 0] # Third agent fails
+        mock_run_agent.side_effect = [
+            (0, 0.1), (0, 0.1), (1, 0.1), (0, 0.1), (0, 0.1)
+        ] # Third agent fails
         
         # Call main
         orchestrator_agent.main()

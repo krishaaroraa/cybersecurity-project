@@ -21,7 +21,19 @@ for path in Path(".").rglob("*"):
     except Exception:
         continue
 
-    if "SECRET_KEY" in text or "password=" in text or "api_key" in text:
+    # Patterns for secrets
+    # We use string concatenation to avoid the script itself matching these patterns
+    if (
+        "SECRET_" + "KEY" in text
+        or "password=" in text
+        or "api_" + "key" in text
+        or "ghp_" in text  # GitHub Personal Access Token
+        or "AKIA" in text  # AWS Access Key ID
+        or "bearer " in text.lower()
+    ):
+        # Additional heuristic to avoid matching the scanning script itself's pattern list
+        if path.name == "security_sentinel.py":
+            continue
         findings.append(str(path))
 
 with open(report_dir / "security-report.md", "w", encoding="utf-8") as f:
