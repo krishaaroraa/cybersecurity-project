@@ -1,5 +1,4 @@
-# buggy_app.py
-# Intentionally buggy demo file for testing/debugging practice.
+
 
 import json
 import math
