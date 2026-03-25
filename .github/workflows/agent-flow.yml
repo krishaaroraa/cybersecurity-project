@@ -24,10 +24,22 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Get changed files
+        id: changed-files
+        run: |
+          echo "files=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | tr '\n' ',' | sed 's/,$//')" >> $GITHUB_OUTPUT
+
       - name: Run Agent Flow
-        run: pip install openai & python agents/orchestrator_agent.py
+        run: python agents/orchestrator_agent.py
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TOGETHER_API_KEY: ${{ secrets.TOGETHER_API_KEY }}
+          CHANGED_FILES: ${{ steps.changed-files.outputs.files }}
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
