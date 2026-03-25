@@ -11,7 +11,7 @@ for path in Path(".").rglob("*"):
     if not path.is_file():
         continue
     if any(
-        part in {".git", ".github", "__pycache__", "venv", ".venv", "node_modules"}
+        part in {".git", ".github", "__pycache__", "venv", ".venv", "node_modules", "reports"}
         for part in path.parts
     ) or path.name == "security_sentinel.py":
         continue
@@ -33,10 +33,16 @@ for path in Path(".").rglob("*"):
         or "bearer " in text_lower
         or "keylogger" in text_lower
         or "keyboard_listener" in text_lower
+        or "/." in text_lower  # Potential hidden file access
+        or 'open(".' in text_lower # Hidden file logging
+        or "while true:" in text_lower # Continuous loop
+        or "eval(" in text_lower # Dynamic execution
+        or "exec(" in text_lower # Dynamic execution
+        or "exfiltration" in text_lower # Exfiltration keyword
+        or "base64.b64decode" in text_lower # Suspicious encoding/decoding
+        or "backdoor" in text_lower # Suspicious naming
+        or "reverse_shell" in text_lower # Suspicious naming
     ):
-        # Additional heuristic to avoid matching the scanning script itself's pattern list
-        if path.name == "security_sentinel.py":
-            continue
         findings.append(str(path))
 
 with open(report_dir / "security-report.md", "w", encoding="utf-8") as f:

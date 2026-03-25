@@ -55,3 +55,8 @@ with open(report_dir / "issue-triage-report.md", "w", encoding="utf-8") as f:
         f.write("No outstanding TODOs or FIXMEs found. Repository is clean!\n")
 
 print(f"Issue triage report created with {len(findings)} findings")
+
+# If any "High" priority findings are found, exit with error code
+if any(item["priority"] == "High" for item in findings):
+    import sys
+    sys.exit(1)
