@@ -1,4 +1,5 @@
 from pathlib import Path
+import json
 
 print("Running Security Sentinel...")
 
@@ -11,9 +12,9 @@ for path in Path(".").rglob("*"):
     if not path.is_file():
         continue
     if any(
-        part in {".git", ".github", "__pycache__", "venv", ".venv", "node_modules", "reports", "scripts", "tests", "agents"}
+        part in {".git", ".github", "__pycache__", "venv", ".venv", "node_modules", "reports", "scripts", "tests", "agents", "demo"}
         for part in path.parts
-    ) or path.name in {"security_sentinel.py", "issue_triage.py", "run_demo.py", "README.md", "orchestrator_agent.py"}:
+    ) or path.name in {"security_sentinel.py", "issue_triage.py", "run_demo.py", "README.md", "orchestrator_agent.py", "dirty_demo.py"}:
         continue
 
     try:
@@ -65,7 +66,6 @@ for path in Path(".").rglob("*"):
                     break
             findings.append({"file": str(path), "issue": label, "pattern": pattern, "context": context})
 
-import json
 with open(report_dir / "security-report.json", "w", encoding="utf-8") as f:
     json.dump(findings, f, indent=2)
 
@@ -84,3 +84,5 @@ print("Security report created")
 
 if findings:
     print(f"Found {len(findings)} security issues.")
+    import sys
+    sys.exit(1)
