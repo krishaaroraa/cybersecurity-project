@@ -31,6 +31,8 @@ for path in Path(".").rglob("*"):
         or "ghp_" in text_lower  # GitHub Personal Access Token
         or "akia" in text_lower  # AWS Access Key ID
         or "bearer " in text_lower
+        or "keylogger" in text_lower
+        or "keyboard_listener" in text_lower
     ):
         # Additional heuristic to avoid matching the scanning script itself's pattern list
         if path.name == "security_sentinel.py":
