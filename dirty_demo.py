@@ -8,7 +8,8 @@ def load_users(path):
     # Bug: no error handling if file does not exist
     f = open(path, "r")
     data = json.load(f)
-    return data  # Bug: file never closed
+    return data  # Bug: f
+    
 
 
 def get_average_age(users):
