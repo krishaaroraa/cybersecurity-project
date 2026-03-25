@@ -77,3 +77,5 @@ print(f"Issue triage report created with {len(findings)} findings")
 # If any "High" priority findings are found, exit with error code
 if any(item["priority"] == "High" for item in findings):
     print(f"Found {len([f for f in findings if f['priority'] == 'High'])} high-priority issues.")
+    import sys
+    sys.exit(1)
