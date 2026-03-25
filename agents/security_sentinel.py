@@ -1,4 +1,5 @@
 from pathlib import Path
+import json
 
 print("Running Security Sentinel...")
 
@@ -65,7 +66,6 @@ for path in Path(".").rglob("*"):
                     break
             findings.append({"file": str(path), "issue": label, "pattern": pattern, "context": context})
 
-import json
 with open(report_dir / "security-report.json", "w", encoding="utf-8") as f:
     json.dump(findings, f, indent=2)
 

@@ -1,5 +1,6 @@
 from pathlib import Path
 import re
+import json
 
 print("Running Issue Triage Agent...")
 
@@ -57,7 +58,6 @@ for path in Path(".").rglob("*"):
                 {"file": str(path), "priority": priority, "task": task, "context": context}
             )
 
-import json
 with open(report_dir / "issue-triage-report.json", "w", encoding="utf-8") as f:
     json.dump(findings, f, indent=2)
 

@@ -37,21 +37,23 @@ def main() -> None:
 
     results = []
     total_start = time.perf_counter()
+    failed = False
     for agent in agents:
         code, duration = run_agent(agent)
         status = "PASSED" if code == 0 else "FAILED"
         results.append({"agent": agent, "status": status, "duration": duration})
+        if code != 0:
+            failed = True
 
     total_duration = time.perf_counter() - total_start
 
     print("\n" + "=" * 60, flush=True)
     print(f"{'Agent':<25} | {'Status':<10} | {'Duration (s)':<12}", flush=True)
     print("-" * 60, flush=True)
-    failed = False
+
     for res in results:
         print(f"{res['agent']:<25} | {res['status']:<10} | {res['duration']:>12.2f}", flush=True)
-        if res['status'] == "FAILED":
-            failed = True
+
     print("-" * 60, flush=True)
     print(f"{'Total':<25} | {'':<10} | {total_duration:>12.2f}", flush=True)
     print("=" * 60, flush=True)
