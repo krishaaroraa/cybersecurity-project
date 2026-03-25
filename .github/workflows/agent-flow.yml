@@ -26,6 +26,8 @@ jobs:
 
       - name: Run Agent Flow
         run: python agents/orchestrator_agent.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4

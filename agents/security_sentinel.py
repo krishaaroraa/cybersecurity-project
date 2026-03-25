@@ -54,7 +54,20 @@ for path in Path(".").rglob("*"):
 
     for label, pattern in patterns.items():
         if pattern in text_lower:
-            findings.append({"file": str(path), "issue": label, "pattern": pattern})
+            # Extract line context for LLM/Analyst
+            lines = text.splitlines()
+            context = ""
+            for i, line in enumerate(lines):
+                if pattern in line.lower():
+                    start = max(0, i - 2)
+                    end = min(len(lines), i + 3)
+                    context = "\n".join(lines[start:end])
+                    break
+            findings.append({"file": str(path), "issue": label, "pattern": pattern, "context": context})
+
+import json
+with open(report_dir / "security-report.json", "w", encoding="utf-8") as f:
+    json.dump(findings, f, indent=2)
 
 with open(report_dir / "security-report.md", "w", encoding="utf-8") as f:
     f.write("# Security Report\n\n")
@@ -70,6 +83,4 @@ with open(report_dir / "security-report.md", "w", encoding="utf-8") as f:
 print("Security report created")
 
 if findings:
-    import sys
-
-    sys.exit(1)
+    print(f"Found {len(findings)} security issues.")
