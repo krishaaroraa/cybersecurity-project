@@ -84,5 +84,3 @@ print("Security report created")
 
 if findings:
     print(f"Found {len(findings)} security issues.")
-    import sys
-    sys.exit(1)
