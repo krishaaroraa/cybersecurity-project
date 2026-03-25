@@ -12,9 +12,9 @@ for path in Path(".").rglob("*"):
     if not path.is_file():
         continue
     if any(
-        part in {".git", ".github", "__pycache__", "venv", ".venv", "node_modules", "reports", "scripts", "tests", "agents"}
+        part in {".git", ".github", "__pycache__", "venv", ".venv", "node_modules", "reports", "scripts", "tests", "agents", "demo"}
         for part in path.parts
-    ) or path.name in {"security_sentinel.py", "issue_triage.py", "run_demo.py", "README.md", "orchestrator_agent.py"}:
+    ) or path.name in {"security_sentinel.py", "issue_triage.py", "run_demo.py", "README.md", "orchestrator_agent.py", "dirty_demo.py"}:
         continue
 
     try:

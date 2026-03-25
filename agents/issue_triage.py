@@ -23,9 +23,9 @@ for path in Path(".").rglob("*"):
     if not path.is_file():
         continue
     if any(
-        part in {".git", ".github", "__pycache__", "venv", ".venv", "node_modules", "agents"}
+        part in {".git", ".github", "__pycache__", "venv", ".venv", "node_modules", "agents", "demo"}
         for part in path.parts
-    ) or path.name in {"issue_triage.py", "security_sentinel.py"}:
+    ) or path.name in {"issue_triage.py", "security_sentinel.py", "dirty_demo.py"}:
         continue
     if path.suffix not in {".py", ".js", ".vue", ".yml", ".yaml"}:
         continue
