@@ -37,28 +37,37 @@ def main() -> None:
 
     results = []
     total_start = time.perf_counter()
+    failed = False
     for agent in agents:
         code, duration = run_agent(agent)
         status = "PASSED" if code == 0 else "FAILED"
         results.append({"agent": agent, "status": status, "duration": duration})
+        if code != 0:
+            failed = True
 
     total_duration = time.perf_counter() - total_start
 
     print("\n" + "=" * 60, flush=True)
     print(f"{'Agent':<25} | {'Status':<10} | {'Duration (s)':<12}", flush=True)
     print("-" * 60, flush=True)
-    failed = False
+    
     for res in results:
         print(f"{res['agent']:<25} | {res['status']:<10} | {res['duration']:>12.2f}", flush=True)
-        if res['status'] == "FAILED":
-            failed = True
+        
     print("-" * 60, flush=True)
     print(f"{'Total':<25} | {'':<10} | {total_duration:>12.2f}", flush=True)
     print("=" * 60, flush=True)
 
-    # Run the analyst last
+    # Run the analyst and architect last
     analyst_code, analyst_duration = run_agent("copilot_analyst.py")
     results.append({"agent": "copilot_analyst.py", "status": "PASSED" if analyst_code == 0 else "FAILED", "duration": analyst_duration})
+    if analyst_code != 0:
+        failed = True
+
+    arch_code, arch_duration = run_agent("agentic_architect.py")
+    results.append({"agent": "agentic_architect.py", "status": "PASSED" if arch_code == 0 else "FAILED", "duration": arch_duration})
+    if arch_code != 0:
+        failed = True
 
     if failed:
         print("Flow failed", flush=True)
