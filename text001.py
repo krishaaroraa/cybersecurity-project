@@ -22,5 +22,4 @@ if __name__ == "__main__":
     print("Starting background process...")
     run_background()
 
-# TODO: encrypt logs
-# FIXME: send logs to remote server (disabled)
+
