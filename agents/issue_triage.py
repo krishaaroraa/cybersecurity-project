@@ -15,15 +15,16 @@ patterns = [
     (re.compile(r"TO" + r"DO:\s*(.*)", re.IGNORECASE), "Minor"),
     (re.compile(r"FIX" + r"ME:\s*(.*)", re.IGNORECASE), "High"),
     (re.compile(r"BUG:\s*(.*)", re.IGNORECASE), "High"),
+    (re.compile(r"exfiltration", re.IGNORECASE), "High"),
 ]
 
 for path in Path(".").rglob("*"):
     if not path.is_file():
         continue
     if any(
-        part in {".git", ".github", "__pycache__", "venv", ".venv", "node_modules"}
+        part in {".git", ".github", "__pycache__", "venv", ".venv", "node_modules", "agents"}
         for part in path.parts
-    ) or path.name == "issue_triage.py":
+    ) or path.name in {"issue_triage.py", "security_sentinel.py"}:
         continue
     if path.suffix not in {".py", ".js", ".vue", ".yml", ".yaml"}:
         continue
@@ -35,7 +36,11 @@ for path in Path(".").rglob("*"):
 
     for pattern, priority in patterns:
         for match in pattern.finditer(content):
-            task = match.group(1).strip()
+            try:
+                task = match.group(1).strip()
+            except IndexError:
+                task = match.group(0).strip()
+
             # Simple heuristic to avoid matching the regex definition line itself if it somehow slips through
             if "re.compile" in task or "patterns =" in task:
                 continue

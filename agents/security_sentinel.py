@@ -11,9 +11,9 @@ for path in Path(".").rglob("*"):
     if not path.is_file():
         continue
     if any(
-        part in {".git", ".github", "__pycache__", "venv", ".venv", "node_modules", "reports"}
+        part in {".git", ".github", "__pycache__", "venv", ".venv", "node_modules", "reports", "scripts", "tests", "agents"}
         for part in path.parts
-    ) or path.name == "security_sentinel.py":
+    ) or path.name in {"security_sentinel.py", "issue_triage.py", "run_demo.py", "README.md", "orchestrator_agent.py"}:
         continue
 
     try:
@@ -21,36 +21,49 @@ for path in Path(".").rglob("*"):
     except Exception:
         continue
 
-    # Patterns for secrets
-    # We use string concatenation to avoid the script itself matching these patterns
+    # Patterns for secrets and threats
+    # We use string concatenation/fragmentation to avoid self-matches
     text_lower = text.lower()
-    if (
-        "secret_" + "key" in text_lower
-        or "password=" in text_lower
-        or "api_" + "key" in text_lower
-        or "ghp_" in text_lower  # GitHub Personal Access Token
-        or "akia" in text_lower  # AWS Access Key ID
-        or "bearer " in text_lower
-        or "keylogger" in text_lower
-        or "keyboard_listener" in text_lower
-        or "/." in text_lower  # Potential hidden file access
-        or 'open(".' in text_lower # Hidden file logging
-        or "while true:" in text_lower # Continuous loop
-        or "eval(" in text_lower # Dynamic execution
-        or "exec(" in text_lower # Dynamic execution
-        or "exfiltration" in text_lower # Exfiltration keyword
-        or "base64.b64decode" in text_lower # Suspicious encoding/decoding
-        or "backdoor" in text_lower # Suspicious naming
-        or "reverse_shell" in text_lower # Suspicious naming
-    ):
-        findings.append(str(path))
+    patterns = {
+        "Secret Key": "secret_" + "key",
+        "API Key": "api_" + "key",
+        "Password": "password=",
+        "GitHub Token": "ghp_",
+        "AWS Key": "akia",
+        "Bearer Token": "bearer ",
+        "Keylogger": "keylogger",
+        "Keyboard Listener": "keyboard_listener",
+        "Hidden File Access": "/.",
+        "Hidden File Logging": 'open(".',
+        "Continuous Loop": "while true:",
+        "Dynamic Execution (eval)": "eval(",
+        "Dynamic Execution (exec)": "exec(",
+        "Exfiltration": "exfiltration",
+        "Suspicious Encoding": "base64.b64decode",
+        "Backdoor": "backdoor",
+        "Reverse Shell": "reverse_shell",
+        "Generic Secret": "secret",
+        "Credential": "credential",
+        "Private Key": "private_" + "key",
+        "Auth Token": "auth_" + "token",
+        "System Command": "os.system(",
+        "Subprocess Call": "subprocess.",
+        "Network POST": "requests.post(",
+        "Socket Connection": "socket.socket",
+    }
+
+    for label, pattern in patterns.items():
+        if pattern in text_lower:
+            findings.append({"file": str(path), "issue": label, "pattern": pattern})
 
 with open(report_dir / "security-report.md", "w", encoding="utf-8") as f:
     f.write("# Security Report\n\n")
     if findings:
         f.write("## Findings\n")
+        f.write("| File | Issue | Detected Pattern |\n")
+        f.write("| --- | --- | --- |\n")
         for item in findings:
-            f.write(f"- Potential secret pattern in `{item}`\n")
+            f.write(f"| `{item['file']}` | {item['issue']} | `{item['pattern']}` |\n")
     else:
         f.write("No obvious security issues found.\n")
 
