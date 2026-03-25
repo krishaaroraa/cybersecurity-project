@@ -1,183 +1,90 @@
-# dirty_demo.py
-# WARNING: Safe demo file for security-scanner testing only.
-# It is intentionally bad code and intentionally suspicious.
+# buggy_app.py
+# Intentionally buggy demo file for testing/debugging practice.
 
-import os
-import time
 import json
-import base64
-import subprocess
-import threading
-
-# -------------------------------------------------------------------
-# Hardcoded secrets / credentials
-# -------------------------------------------------------------------
-API_KEY = "sk-demo-1234567890-very-secret"
-TOKEN = "ghp_demoFakeGithubToken123456789"
-
-# -------------------------------------------------------------------
-# Suspicious filenames / hidden paths
-# -------------------------------------------------------------------
-LOG_FILE = ".system_cache.log"
-HIDDEN_DATA_FILE = ".keys_buffer.txt"
-EXPORT_FILE = "export_dump.json"
-
-# TODO: encrypt captured data before writing
-# FIXME: send logs to remote endpoint later
-# TODO: remove debug mode before production
-# FIXME: replace weak credentials
-# TODO: add startup persistence
-
-DEBUG = True
-unused_variable = "this should be flagged"
-temporary_buffer = []
-
-print("[DEBUG] Launching background monitor...")  # debug print left in
+import math
 
 
-# -------------------------------------------------------------------
-# Suspicious shell usage
-# -------------------------------------------------------------------
-def run_system_command(cmd):
-    # SECURITY ISSUE: shell=True
-    return subprocess.check_output(cmd, shell=True, text=True)
-
-
-# -------------------------------------------------------------------
-# Unsafe dynamic execution
-# -------------------------------------------------------------------
-def evaluate_expression(expr):
-    # SECURITY ISSUE: eval on untrusted input
-    return eval(expr)
-
-
-# -------------------------------------------------------------------
-# Bad file handling
-# -------------------------------------------------------------------
-def insecure_read_file(path):
+def load_users(path):
+    # Bug: no error handling if file does not exist
     f = open(path, "r")
-    data = f.read()
-    return data  # file not closed
+    data = json.load(f)
+    return data  # Bug: file never closed
 
 
-def insecure_write_file(path, content):
-    f = open(path, "a")
-    f.write(content)
-    # file not closed
+def get_average_age(users):
+    total = 0
+    for user in users:
+        total += user["age"]
+    return total / len(users)  # Bug: ZeroDivisionError if users is empty
 
 
-# -------------------------------------------------------------------
-# Fake "key capture" structure for scanner detection
-# This does NOT capture real keys. It only simulates suspicious behavior.
-# -------------------------------------------------------------------
-def fake_key_capture():
-    fake_stream = [
-        "h", "e", "l", "l", "o",
-        "ENTER",
-        "u", "s", "e", "r",
-        "TAB",
-        "p", "a", "s", "s", "w", "o", "r", "d", "1", "2", "3"
-    ]
-
-    for item in fake_stream:
-        insecure_write_file(HIDDEN_DATA_FILE, item + "\n")
-        time.sleep(0.05)
+def find_user(users, username):
+    for user in users:
+        if user["username"] == username.lower():
+            return user
+    return users[0]  # Bug: crashes if list is empty, and bad fallback
 
 
-def background_listener():
-    # Simulates suspicious always-on monitoring
-    while False:
-        fake_key_capture()
+def update_score(user, score):
+    # Bug: score may be string, causing TypeError later
+    user["score"] += score
+    return user
 
 
-# -------------------------------------------------------------------
-# Fake encoding / "exfiltration-like" packaging
-# This only writes locally for testing. No network calls.
-# -------------------------------------------------------------------
-def package_logs():
-    if not os.path.exists(HIDDEN_DATA_FILE):
-        return None
+def calculate_discount(price, percent):
+    # Bug: wrong formula
+    return price * percent / 100
 
-    content = insecure_read_file(HIDDEN_DATA_FILE)
-    encoded = base64.b64encode(content.encode()).decode()
 
-    payload = {
-        "host": os.getenv("HOSTNAME", "unknown-host"),
-        "user": os.getenv("USER", "unknown-user"),
-        "data": encoded,
-        "timestamp": time.time(),
-        "debug": True,
+def print_report(users):
+    print("=== USER REPORT ===")
+    for i in range(len(users) + 1):  # Bug: off-by-one, will crash
+        user = users[i]
+        print(user["username"], "-", user["age"], "-", user["score"])
+
+
+def save_summary(path, users):
+    summary = {
+        "count": len(users),
+        "average_age": get_average_age(users),
     }
 
-    insecure_write_file(EXPORT_FILE, json.dumps(payload) + "\n")
-    return payload
+    # Bug: file opened in read mode instead of write mode
+    with open(path, "r") as f:
+        json.dump(summary, f)
 
 
-# -------------------------------------------------------------------
-# Bad authentication logic
-# -------------------------------------------------------------------
-def login(username, password):
-    if username == "admin" and password == DB_PASSWORD:
-        return True
-    return False
+def get_initial(username):
+    # Bug: crashes on empty string / None
+    return username[0].upper()
 
 
-# -------------------------------------------------------------------
-# Poor validation / fragile logic
-# -------------------------------------------------------------------
-def double_items(values):
-    result = []
-    for i in range(len(values)):
-        result.append(values[i] * 2)
-    return result
+def compute_circle_area(radius):
+    # Bug: math typo and no validation
+    return math.PI * radius * radius
 
 
-def divide(a, b):
-    return a / b  # no protection against division by zero
+def main():
+    users = load_users("users.json")
+
+    print("Average age:", get_average_age(users))
+
+    target = find_user(users, "Alice")
+    print("Found user:", target["username"])
+
+    # Bug: adding string to possibly int
+    update_score(target, "10")
+
+    print("Discounted price:", calculate_discount(200, 20))
+    print("Initial:", get_initial(""))
+
+    # Bug: negative radius not handled
+    print("Area:", compute_circle_area(-5))
+
+    print_report(users)
+    save_summary("summary.json", users)
 
 
-# -------------------------------------------------------------------
-# Suspicious thread setup (disabled behavior)
-# -------------------------------------------------------------------
-def start_monitor():
-    t = threading.Thread(target=background_listener, daemon=True)
-    t.start()
-    return t
-
-
-# -------------------------------------------------------------------
-# Main routine
-# -------------------------------------------------------------------
 if __name__ == "__main__":
-    print("[DEBUG] Starting demo...")
-
-    # Suspicious but inert fake logging behavior
-    fake_key_capture()
-    payload = package_logs()
-    print("[DEBUG] Packaged payload:", payload)
-
-    # Hardcoded login test
-    if login("admin", "superweakpassword"):
-        print("[DEBUG] Logged in with hardcoded credentials")
-
-    # Dangerous command execution pattern
-    try:
-        command = "echo demo-run"
-        output = run_system_command(command)
-        print("[DEBUG] Command output:", output)
-    except Exception as e:
-        print("[DEBUG] Command failed:", e)
-
-    # Dangerous eval pattern
-    try:
-        expression = "2 + 2"
-        print("[DEBUG] Eval result:", evaluate_expression(expression))
-    except Exception as e:
-        print("[DEBUG] Eval failed:", e)
-
-    # Runtime bug / crash risk
-    nums = [1, 2, 3]
-    print(nums[10])  # intentional IndexError risk
-
-    # Another runtime risk
-    print(divide(10, 0))  # intentional ZeroDivisionError risk
+    main()
