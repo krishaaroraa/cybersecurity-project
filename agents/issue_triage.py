@@ -14,6 +14,7 @@ findings = []
 patterns = [
     (re.compile(r"TO" + r"DO:\s*(.*)", re.IGNORECASE), "Minor"),
     (re.compile(r"FIX" + r"ME:\s*(.*)", re.IGNORECASE), "High"),
+    (re.compile(r"BUG:\s*(.*)", re.IGNORECASE), "High"),
 ]
 
 for path in Path(".").rglob("*"):
