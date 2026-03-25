@@ -23,13 +23,14 @@ for path in Path(".").rglob("*"):
 
     # Patterns for secrets
     # We use string concatenation to avoid the script itself matching these patterns
+    text_lower = text.lower()
     if (
-        "SECRET_" + "KEY" in text
-        or "password=" in text
-        or "api_" + "key" in text
-        or "ghp_" in text  # GitHub Personal Access Token
-        or "AKIA" in text  # AWS Access Key ID
-        or "bearer " in text.lower()
+        "secret_" + "key" in text_lower
+        or "password=" in text_lower
+        or "api_" + "key" in text_lower
+        or "ghp_" in text_lower  # GitHub Personal Access Token
+        or "akia" in text_lower  # AWS Access Key ID
+        or "bearer " in text_lower
     ):
         # Additional heuristic to avoid matching the scanning script itself's pattern list
         if path.name == "security_sentinel.py":
