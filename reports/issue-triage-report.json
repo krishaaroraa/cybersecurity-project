@@ -1,0 +1,8 @@
+[
+  {
+    "file": "projects/sample-app/app.py",
+    "priority": "Minor",
+    "task": "Implement main logic here",
+    "context": "# Sample code for testing\ndef main():\n    # TODO: Implement main logic here\n    print(\"Running sample app...\")\n"
+  }
+]

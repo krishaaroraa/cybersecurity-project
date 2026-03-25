@@ -8,11 +8,7 @@ def main():
     print("Running Copilot Analyst Agent...")
 
     # User provided Together AI key, which is OpenAI compatible
-    api_key = os.environ.get("TOGETHER_API_KEY")
-    if not api_key:
-        print("Missing TOGETHER_API_KEY environment variable. Skipping analysis.")
-        return
-
+    api_key = os.environ.get("TOGETHER_API_KEY", "tgp_v1_kI0aR5E7RyxnilsPMYZ7NMwmysiHizmsuK5TX_xfKX0")
     client = OpenAI(
         api_key=api_key,
         base_url="https://api.together.ai/v1",
