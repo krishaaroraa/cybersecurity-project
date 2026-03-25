@@ -28,14 +28,44 @@ class AgenticArchitect:
         # Intelligent selection based on size and extension
         return [f for f in self.repo_map.keys() if f.endswith(('.py', '.js', '.vue', '.yml', '.yaml'))]
 
-    def intelligent_chunk(self, content, max_lines=100):
+    def intelligent_chunk(self, content, max_lines=100, overlap=10):
         lines = content.splitlines()
-        return ["\n".join(lines[i:i + max_lines]) for i in range(0, len(lines), max_lines)]
+        chunks = []
+        for i in range(0, len(lines), max_lines - overlap):
+            chunk = "\n".join(lines[i:i + max_lines])
+            chunks.append(chunk)
+            if i + max_lines >= len(lines):
+                break
+        return chunks
+
+    def phase_project_understanding(self):
+        print("Phase 0: Project Understanding...")
+        self.map_repository()
+        readme = ""
+        if Path("README.md").exists():
+            readme = Path("README.md").read_text()[:2000]
+
+        tree = "\n".join(list(self.repo_map.keys())[:100])
+        prompt = f"Given this repository structure and README, identify the most CRITICAL files for security and bug analysis.\nREADME:\n{readme}\nFILES:\n{tree}\nOutput a comma-separated list of filenames."
+        try:
+            response = self.client.chat.completions.create(
+                model="mistralai/Mixtral-8x7B-Instruct-v0.1",
+                messages=[{"role": "user", "content": prompt}],
+            )
+            return [f.strip() for f in response.choices[0].message.content.split(",")]
+        except:
+            return []
 
     def phase_contextual_discovery(self):
-        print("Phase 1: Contextual Discovery...")
-        self.map_repository()
-        return self.select_relevant_files()
+        print("Phase 1: Contextual Discovery & Selection...")
+        critical_files = self.phase_project_understanding()
+        changed_files = os.environ.get("CHANGED_FILES", "").split(",")
+        all_relevant = list(set([f for f in critical_files + changed_files if f in self.repo_map]))
+
+        if not all_relevant:
+            all_relevant = self.select_relevant_files()
+
+        return all_relevant
 
     def phase_selection_deep_dive(self, files):
         print(f"Phase 2: Selection & Deep Dive on {len(files)} files...")
