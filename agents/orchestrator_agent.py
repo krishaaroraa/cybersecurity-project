@@ -56,6 +56,10 @@ def main() -> None:
     print(f"{'Total':<25} | {'':<10} | {total_duration:>12.2f}", flush=True)
     print("=" * 60, flush=True)
 
+    # Run the analyst last
+    analyst_code, analyst_duration = run_agent("copilot_analyst.py")
+    results.append({"agent": "copilot_analyst.py", "status": "PASSED" if analyst_code == 0 else "FAILED", "duration": analyst_duration})
+
     if failed:
         print("Flow failed", flush=True)
         sys.exit(1)

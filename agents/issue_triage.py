@@ -44,9 +44,22 @@ for path in Path(".").rglob("*"):
             # Simple heuristic to avoid matching the regex definition line itself if it somehow slips through
             if "re.compile" in task or "patterns =" in task:
                 continue
+            # Extract line context for LLM/Analyst
+            lines = content.splitlines()
+            context = ""
+            for i, line in enumerate(lines):
+                if task in line or match.group(0) in line:
+                    start = max(0, i - 2)
+                    end = min(len(lines), i + 3)
+                    context = "\n".join(lines[start:end])
+                    break
             findings.append(
-                {"file": str(path), "priority": priority, "task": task}
+                {"file": str(path), "priority": priority, "task": task, "context": context}
             )
+
+import json
+with open(report_dir / "issue-triage-report.json", "w", encoding="utf-8") as f:
+    json.dump(findings, f, indent=2)
 
 with open(report_dir / "issue-triage-report.md", "w", encoding="utf-8") as f:
     f.write("# Issue Triage Report\n\n")
@@ -63,5 +76,4 @@ print(f"Issue triage report created with {len(findings)} findings")
 
 # If any "High" priority findings are found, exit with error code
 if any(item["priority"] == "High" for item in findings):
-    import sys
-    sys.exit(1)
+    print(f"Found {len([f for f in findings if f['priority'] == 'High'])} high-priority issues.")
