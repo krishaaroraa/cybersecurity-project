@@ -12,10 +12,7 @@ import threading
 # -------------------------------------------------------------------
 # Hardcoded secrets / credentials
 # -------------------------------------------------------------------
-API_KEY = "sk-demo-1234567890-very-secret"
-DB_PASSWORD = "superweakpassword"
-AWS_SECRET = "AKIADEMOFAKEKEY12345"
-TOKEN = "ghp_demoFakeGithubToken123456789"
+
 
 # -------------------------------------------------------------------
 # Suspicious filenames / hidden paths
